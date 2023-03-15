@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>瑞吉外卖管理端</title>
+    <title>Reggie Takeout Management Terminal</title>
     <link rel="shortcut icon" href="favicon.ico">
     <!-- 引入样式 -->
     <link rel="stylesheet" href="plugins/element-ui/index.css" />
@@ -74,14 +74,14 @@
           <div class="navbar">
             <div class="head-lable">
               <span v-if="goBackFlag" class="goBack" @click="goBack()"
-                ><img src="images/icons/btn_back@2x.png" alt="" /> 返回</span
+                ><img src="images/icons/btn_back@2x.png" alt="" /> Return</span
               >
               <span>{{headTitle}}</span>
             </div>
             <div class="right-menu">
               <div class="avatar-wrapper">{{ userInfo.name }}</div>
               <!-- <div class="logout" @click="logout">退出</div> -->
-              <img src="images/icons/btn_close@2x.png" class="outLogin" alt="退出" @click="logout" />
+              <img src="images/icons/btn_close@2x.png" class="outLogin" alt="Exit" @click="logout" />
             </div>
           </div>
           <div class="app-main" v-loading="loading">
@@ -124,31 +124,31 @@
               //   children: [
                   {
                     id: '2',
-                    name: '员工管理',
+                    name: 'Staff',
                     url: 'page/member/list.html',
                     icon: 'icon-member'
                   },
                   {
                     id: '3',
-                    name: '分类管理',
+                    name: 'Category',
                     url: 'page/category/list.html',
                     icon: 'icon-category'
                   },
                   {
                     id: '4',
-                    name: '菜品管理',
+                    name: 'Cuisines',
                     url: 'page/food/list.html',
                     icon: 'icon-food'
                   },
                   {
                     id: '5',
-                    name: '套餐管理',
+                    name: 'Meals',
                     url: 'page/combo/list.html',
                     icon: 'icon-combo'
                   },
                   {
                     id: '6',
-                    name: '订单明细',
+                    name: 'Order Detail',
                     url: 'page/order/list.html',
                     icon: 'icon-order'
                   }
@@ -156,7 +156,7 @@
               // },
             ],
             iframeUrl: 'page/member/list.html',
-            headTitle: '员工管理',
+            headTitle: 'Staff',
             goBackFlag: false,
             loading: true,
             timer: null
