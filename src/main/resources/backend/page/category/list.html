@@ -223,7 +223,7 @@
               'cancelButtonText': '取消',
               'type': 'warning'
             }).then(() => {
-              deleCategory(id).then(res => {
+              delCategory(id).then(res => {
                 if (res.code === 1) {
                   this.$message.success('删除成功！')
                   this.handleQuery()

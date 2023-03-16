@@ -23,5 +23,12 @@ public class GlobalExceptionHandler {
         }
         return Result.error("Error");
     }
+
+
+    @ExceptionHandler(CustomException.class)
+    public Result<String> exceptionHandler(CustomException exception) {
+        log.error(exception.getMessage());
+        return Result.error(exception.getMessage());
+    }
 }
 

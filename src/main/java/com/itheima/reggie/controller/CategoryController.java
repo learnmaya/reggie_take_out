@@ -50,8 +50,17 @@ public class CategoryController {
     @DeleteMapping
     public Result<String> delete(Long id) {
         log.info("Delete Category, id is {]");
-        categoryService.removeById(id);
+        categoryService.remove(id);
         return Result.success("Category deleted successfully ！");
     }
+
+    @PutMapping
+    public Result<String> update(@RequestBody Category category) {
+        log.info("Modify category information");
+        categoryService.updateById(category);
+        return Result.success("Modified successfully !");
+    }
+
+
 
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 套餐
  */
 @Data
-public class SetMeal implements Serializable {
+public class Setmeal implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

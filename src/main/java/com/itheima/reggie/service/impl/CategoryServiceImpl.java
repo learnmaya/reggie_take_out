@@ -1,9 +1,17 @@
 package com.itheima.reggie.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.entity.Category;
+import com.itheima.reggie.entity.Dish;
+import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.mapper.CategoryMapper;
 import com.itheima.reggie.service.CategoryService;
+import com.itheima.reggie.service.DishService;
+import com.itheima.reggie.service.SetmealService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,5 +26,38 @@ import org.springframework.stereotype.Service;
  * The CategoryServiceImpl class can also define additional methods to implement custom business logic or to override the default behavior provided by the ServiceImpl class.
  */
 @Service
+@Slf4j
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
+    @Autowired
+    private DishService dishService;
+    @Autowired
+    private SetmealService setMealService;
+
+    /**
+     * Delete Category,if current category is not linked to other dish or set meal
+     * @param id
+     */
+    @Override
+    public void remove(Long id) {
+
+        LambdaQueryWrapper<Dish> dishLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dishLambdaQueryWrapper.eq(Dish::getCategoryId,id);
+        int countDish = dishService.count(dishLambdaQueryWrapper);
+        log.info("The number of entries for the dish query：{}",countDish);
+        if (countDish > 0) {
+            throw new CustomException("This category has already tied to dishes so it cannot be deleted.");
+
+        }
+
+        LambdaQueryWrapper<Setmeal> setMealLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        setMealLambdaQueryWrapper.eq(Setmeal::getCategoryId,id);
+
+        setMealLambdaQueryWrapper.eq(Setmeal::getCategoryId,id);
+        int countSetMeal = setMealService.count(setMealLambdaQueryWrapper);
+        log.info("The number of entries for the dish query setmeal：{}",countSetMeal);
+        if (countSetMeal > 1) {
+            throw new CustomException("This category has already tied to set meals so it cannot be deleted.");
+        }
+        super.removeById(id);
+    };
 }
