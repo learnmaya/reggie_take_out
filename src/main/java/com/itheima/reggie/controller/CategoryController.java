@@ -21,8 +21,6 @@ public class CategoryController {
      * This method handles a POST request to add a new Category to the system.
      * @param category The Category object to be added to the system.
      * @return A Result object with a success message if the operation was successful.
-     * @throws InvalidRequestException If the request body is invalid.
-     * @throws DuplicateCategoryException If a category with the same name already exists in the system.
      */
     @PostMapping
     public Result<String> save(@RequestBody Category category) {
@@ -42,10 +40,18 @@ public class CategoryController {
     @GetMapping("/page")
     public Result<Page> page(int page, int pageSize) {
         Page<Category> pageInfo = new Page<>(page, pageSize);
+        //Conditional Constructor,base on sort
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(Category::getSort);
+        queryWrapper.orderByAsc(Category::getSort);
         categoryService.page(pageInfo, queryWrapper);
         return Result.success(pageInfo);
+    }
+
+    @DeleteMapping
+    public Result<String> delete(Long id) {
+        log.info("Delete Category, id is {]");
+        categoryService.removeById(id);
+        return Result.success("Category deleted successfully ！");
     }
 
 }
