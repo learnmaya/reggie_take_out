@@ -38,4 +38,7 @@ public class Result<T> {
         return this;
     }
 
+    public boolean isSuccess() {
+        return this.code == 1;
+    }
 }
