@@ -1,8 +1,10 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
+import com.itheima.reggie.common.Result;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
@@ -13,6 +15,8 @@ import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * The CategoryServiceImpl class extends the ServiceImpl class from the MyBatis-Plus framework.
@@ -59,5 +63,42 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             throw new CustomException("This category has already tied to set meals so it cannot be deleted.");
         }
         super.removeById(id);
-    };
+    }
+
+    @Override
+    public Result<String> saveCategory(Category category) {
+        this.save(category);
+        return Result.success("Added new category successfully");
+    }
+
+    @Override
+    public Result<Page> generatePage(int page, int pageSize) {
+        Page<Category> pageInfo = new Page<>(page, pageSize);
+        //Conditional Constructor,base on sort
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByAsc(Category::getSort);
+        this.page(pageInfo, queryWrapper);
+        return Result.success(pageInfo);
+    }
+
+    @Override
+    public Result<String> deleteCategory(Long id) {
+        this.remove(id);
+        return Result.success("Category deleted successfully ！");
+    }
+
+    @Override
+    public Result<String> updateCategory(Category category) {
+        this.updateById(category);
+        return Result.success("Modified successfully !");
+    }
+
+    @Override
+    public Result<List<Category>> generateList(Category category) {
+        LambdaQueryWrapper<Category> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(category.getType() != null,Category::getType,category.getType());
+        lambdaQueryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> list = this.list(lambdaQueryWrapper);
+        return Result.success(list);
+    }
 }

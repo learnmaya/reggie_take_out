@@ -1,6 +1,5 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.entity.Category;
@@ -26,9 +25,8 @@ public class CategoryController {
      */
     @PostMapping
     public Result<String> save(@RequestBody Category category) {
-        log.info("category:{}",category);
-        categoryService.save(category);
-        return Result.success("Added new category successfully");
+        log.info("Category:{}",category);
+        return categoryService.saveCategory(category);
     }
 
 
@@ -41,37 +39,24 @@ public class CategoryController {
 
     @GetMapping("/page")
     public Result<Page> page(int page, int pageSize) {
-        Page<Category> pageInfo = new Page<>(page, pageSize);
-        //Conditional Constructor,base on sort
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByAsc(Category::getSort);
-        categoryService.page(pageInfo, queryWrapper);
-        return Result.success(pageInfo);
+        return categoryService.generatePage(page,pageSize);
     }
 
     @DeleteMapping
     public Result<String> delete(Long id) {
         log.info("Delete Category, id is {]");
-        categoryService.remove(id);
-        return Result.success("Category deleted successfully ！");
+        return categoryService.deleteCategory(id);
     }
 
     @PutMapping
     public Result<String> update(@RequestBody Category category) {
         log.info("Modify category information");
-        categoryService.updateById(category);
-        return Result.success("Modified successfully !");
+        return categoryService.updateCategory(category);
     }
 
     @GetMapping("/list")
     public Result<List<Category>> list(Category category) {
-        LambdaQueryWrapper<Category> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(category.getType() != null,Category::getType,category.getType());
-        lambdaQueryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
-        List<Category> list = categoryService.list(lambdaQueryWrapper);
-        return Result.success(list);
+        return categoryService.generateList(category);
     }
-
-
 
 }
