@@ -24,37 +24,7 @@ public class EmployeeController {
 
     @PostMapping("/login")
     public Result<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
-        // 1.Md5 encryption of passwords.
-        String password = employee.getPassword();
-        password = DigestUtils.md5DigestAsHex(password.getBytes());
-
-        // Query employee info from database
-
-        LambdaQueryWrapper<Employee> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Employee::getUsername, employee.getUsername());
-        Employee emp = employeeService.getOne(lqw);
-
-        // 3. if didn't find the username
-        if (emp == null) {
-            return Result.error("Incorrect login name or password");
-        }
-
-        // 4. compare password
-
-        if (!emp.getPassword().equals(password) ) {
-            return Result.error("Incorrect login name or password");
-        }
-
-        // 5. Verify does the account disabled
-
-        if (emp.getStatus() == 0) {
-            return Result.error("This employee account has been disabled");
-        }
-
-        // 6.Store employee id in session and put back successful results
-        request.getSession().setAttribute("employee",emp.getId());
-        return Result.success(emp);
-
+        return employeeService.loginByEmployee(request, employee);
     }
 
     /**
@@ -109,7 +79,7 @@ public class EmployeeController {
     public Result<Page> page(int page,int pageSize, String name) {
         log.info("page={},pageSize={},name={}", page, pageSize, name);
 
-        Page pageInfo =new Page(page,pageSize);
+        Page<Employee> pageInfo =new Page(page,pageSize);
 
         LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(!(name == null || "".equals(name)), Employee::getName, name);
