@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.dto.DishDto;
 
+import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Slf4j
@@ -54,5 +57,22 @@ public class DishController {
         return Result.success("Modified dishes successfully");
     }
 
-    
+    @PostMapping("/status/{status}")
+    public Result<String> updateStatus(@PathVariable String status,Long ids) {
+        Integer statusInt = Integer.valueOf(status);
+        dishService.updateStatusById(statusInt,ids);
+        return Result.success("Modify status successfully！");
+    }
+
+    @DeleteMapping
+    public Result<String> deleteByIds(Long ids) {
+        return dishService.deleteDish(ids);
+    }
+
+    @GetMapping("/list")
+    public Result<List<Dish>> getDishByCategoryList(Dish dish){
+        log.info("The list we trying to get {}",dish.getCategoryId());
+        return dishService.getListByCategoryId(dish);
+    }
+
 }

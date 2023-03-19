@@ -18,4 +18,5 @@ public interface CategoryService extends IService<Category> {
     Result<String> deleteCategory(Long id);
     Result<String> updateCategory(Category category);
     Result<List<Category>> generateList(Category category);
+
 }

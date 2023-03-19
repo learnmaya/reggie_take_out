@@ -124,4 +124,33 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         dishDto.setFlavors(flavors);
         return dishDto;
     }
+
+    @Override
+    public String updateStatusById(Integer status, Long ids) {
+        log.info("The status {} and ids {}",status,ids);
+        Dish dish = this.getById(ids);
+        dish.setStatus(status);
+        this.updateById(dish);
+        String success = "Selling status modified successfully!";
+        return success;
+    }
+
+    @Override
+    public Result<String> deleteDish(Long ids) {
+        log.info("The id of the dish to be deleted {}",ids);
+        this.removeById(ids);
+        return Result.success("Dishes deleted successfully");
+    }
+
+    private final int statusCode = 1; // The dishes that on sell
+
+    @Override
+    public Result<List<Dish>> getListByCategoryId(Dish dish) {
+        LambdaQueryWrapper<Dish> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(dish.getCategoryId() != null,Dish::getCategoryId,dish.getCategoryId());
+        lqw.eq(Dish::getStatus,statusCode);
+        lqw.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        List<Dish> dishList = this.list(lqw);
+        return Result.success(dishList);
+    }
 }
