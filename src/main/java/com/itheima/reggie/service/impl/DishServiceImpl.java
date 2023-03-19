@@ -3,6 +3,7 @@ package com.itheima.reggie.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
@@ -136,9 +137,20 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     }
 
     @Override
-    public Result<String> deleteDish(Long ids) {
+    @Transactional
+    public Result<String> deleteDish(List<Long> ids) {
         log.info("The id of the dish to be deleted {}",ids);
-        this.removeById(ids);
+        LambdaQueryWrapper<Dish> dishQueryWrapper = new LambdaQueryWrapper<>();
+        dishQueryWrapper.in(Dish::getId,ids);
+        dishQueryWrapper.eq(Dish::getStatus,statusCode);
+        int count = this.count(dishQueryWrapper);
+        if (count > 0) {
+            throw new CustomException("This dish is on sale, please stop selling before deleting");
+        }
+        this.removeByIds(ids);
+        LambdaQueryWrapper<DishFlavor> dishFlavorQueryWrapper = new LambdaQueryWrapper<>();
+        dishFlavorQueryWrapper.in(DishFlavor::getDishId,ids);
+        dishFlavorService.remove(dishFlavorQueryWrapper);
         return Result.success("Dishes deleted successfully");
     }
 

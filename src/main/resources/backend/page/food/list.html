@@ -76,7 +76,7 @@
         </el-table-column>
         <el-table-column label="Selling Status">
           <template slot-scope="scope">
-            <span style="margin-right: 10px;">{{ scope.row.status == '0' ? 'Stop Selling' : 'On Sale' }}</span>
+            <span style="margin-right: 10px;">{{ scope.row.status == '0' ? 'Stop Sale' : 'On Sale' }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -104,7 +104,7 @@
               class="blueBug"
               @click="statusHandle(scope.row)"
             >
-              {{ scope.row.status == '0' ? 'On Sale' : 'Stop selling' }}
+              {{ scope.row.status == '0' ? 'On Sale' : 'Stop Sale' }}
             </el-button>
             <el-button
               type="text"

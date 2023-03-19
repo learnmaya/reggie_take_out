@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -22,7 +21,7 @@ public interface DishService extends IService<Dish> {
 
     String updateStatusById(Integer status, Long ids);
 
-    Result<String> deleteDish(Long ids);
+    Result<String> deleteDish(List<Long> ids);
 
     Result<List<Dish>> getListByCategoryId(Dish dish);
 }

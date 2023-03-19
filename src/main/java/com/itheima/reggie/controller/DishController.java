@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -65,7 +64,8 @@ public class DishController {
     }
 
     @DeleteMapping
-    public Result<String> deleteByIds(Long ids) {
+    public Result<String> deleteByIds(@RequestParam List<Long> ids) {
+
         return dishService.deleteDish(ids);
     }
 
