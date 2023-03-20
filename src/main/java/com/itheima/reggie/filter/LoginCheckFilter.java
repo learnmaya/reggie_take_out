@@ -36,7 +36,9 @@ public class LoginCheckFilter implements Filter{
                 "/employee/logout",
                 "/backend/**",
                 "/front/**",
-                "/common/**"
+                "/common/**",
+                "/user/login",
+                "/user/sendMsg"
         };
 
 
@@ -50,7 +52,7 @@ public class LoginCheckFilter implements Filter{
 
         //Based on login status, determine if processing is required
         if(request.getSession().getAttribute("employee") != null){
-            log.info("The user already logged in and the user id is: {}",request.getSession().getAttribute("employee"));
+            log.info("The employee already logged in and the employee id is: {}",request.getSession().getAttribute("employee"));
             Long empId = (Long) request.getSession().getAttribute("employee");
             BaseContext.setCurrentId(empId);
 
@@ -58,7 +60,16 @@ public class LoginCheckFilter implements Filter{
             return;
         }
 
-        log.info("User not logged in");
+        log.info("employee not logged in");
+
+
+        if(request.getSession().getAttribute("user") != null){
+            log.info("用户已登录，用户id为：{}",request.getSession().getAttribute("user"));
+            Long userId = (Long)request.getSession().getAttribute("user");
+            BaseContext.setCurrentId(userId);
+            filterChain.doFilter(request,response);
+            return;
+        }
 
         //If not logged in, return the result of not logged in, and respond to the client page through the output stream
         response.getWriter().write(JSON.toJSONString(Result.error("NOTLOGIN")));
