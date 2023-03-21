@@ -3,6 +3,7 @@ package com.itheima.reggie.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.dto.SetmealDto;
+import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +42,16 @@ public class SetmealController {
     }
 
     @PostMapping("/status/{status}")
-    public Result<String> updateStatus(@PathVariable String status,Long ids) {
+    public Result<String> updateStatus(@PathVariable String status, @RequestParam List<Long> ids) {
         Integer statusInt = Integer.valueOf(status);
         setmealService.updateStatusById(statusInt,ids);
         return Result.success("Modify status successfully！");
     }
 
+    @GetMapping("/list")
+    public Result<List<Setmeal>> getListById(Setmeal setmeal) {
+        return setmealService.getListById(setmeal);
+    }
 
     @DeleteMapping
     public Result<String> deleteByIds(@RequestParam List<Long> ids) {

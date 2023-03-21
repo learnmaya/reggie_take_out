@@ -53,10 +53,24 @@ public class MailUtils {
         InternetAddress to = new InternetAddress(email);
         message.setRecipient(RecipientType.TO, to);
         // 设置邮件标题
-        message.setSubject("Kyle's Blog 邮件测试");
+        message.setSubject("Welcome to Reggie's Takeout Services!");
         // 设置邮件的内容体
-        message.setContent("尊敬的用户:你好!\n注册验证码为:" + code + "(有效期为一分钟,请勿告知他人)", "text/html;charset=UTF-8");
+        //message.setContent("Dear user:Hello! \n registration verification code is:" + code + "(Valid for one minute, please do not tell others)", "text/html;charset=UTF-8");
         // 最后当然就是发送邮件啦
+        String content = "<html><body><p>Dear Customer,</p>"
+                + "<p>Thank you for choosing Reggie Takeout Services. We are committed to providing you with:</p>"
+                + "<ul><li>High-quality</li>"
+                + "<li>Convenient, and</li>"
+                + "<li>Secure takeout services.</li></ul>"
+                + "<p>To ensure the security of your account, we have generated the following registration verification code:</p>"
+                + "<p><strong>Verification Code: " + code + "</strong></p>"
+                + "<p>This code will be valid for one minute, so please do not share it with anyone. If you did not request this code, please disregard this email.</p>"
+                + "<p>If you have any questions or need assistance, please feel free to contact our customer service team. We are here to help you.</p>"
+                + "<p>Thank you for choosing Reggie Takeout Services!</p>"
+                + "<p>Best regards,<br>The Reggie Takeout Services Team</p></body></html>";
+
+        message.setContent(content, "text/html;charset=UTF-8");
+
         Transport.send(message);
     }
 

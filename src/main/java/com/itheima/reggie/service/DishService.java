@@ -19,9 +19,9 @@ public interface DishService extends IService<Dish> {
 
     DishDto getByIdWithFlavor(Long id);
 
-    String updateStatusById(Integer status, Long ids);
+    String updateStatusById(Integer status, List<Long> ids);
 
     Result<String> deleteDish(List<Long> ids);
 
-    Result<List<Dish>> getListByCategoryId(Dish dish);
+    Result<List<DishDto>> getListByCategoryId(Dish dish);
 }

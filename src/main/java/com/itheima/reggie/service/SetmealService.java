@@ -19,5 +19,7 @@ public interface SetmealService extends IService<Setmeal> {
 
     Result<String> updateWithId(SetmealDto setmealDto);
 
-    void updateStatusById(Integer statusInt, Long ids);
+    void updateStatusById(Integer statusInt, List<Long> ids);
+
+    Result<List<Setmeal>> getListById(Setmeal setmeal);
 }

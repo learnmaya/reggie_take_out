@@ -41,6 +41,11 @@ public class AddressBookController {
         return addressBookService.updateAddress(addressBook);
     }
 
+    @GetMapping("/default")
+    public Result<AddressBook> getDefaultAddress() {
+        return addressBookService.getDefaultAddress();
+    }
+
     @PutMapping("/default")
     public Result<AddressBook> setDefaultAddress(@RequestBody AddressBook addressBook) {
         return addressBookService.setDefaultAddress(addressBook);

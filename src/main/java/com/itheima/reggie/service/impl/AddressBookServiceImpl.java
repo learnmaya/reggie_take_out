@@ -66,4 +66,14 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper,Addres
         this.updateById(addressBook);
         return Result.success(addressBook);
     }
+
+    @Override
+    public Result<AddressBook> getDefaultAddress() {
+        Long userId = BaseContext.getCurrentId();
+        LambdaQueryWrapper<AddressBook> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(userId != null,AddressBook::getUserId,userId);
+        lqw.eq(AddressBook::getIsDefault,1);
+        AddressBook addressBook = this.getOne(lqw);
+        return Result.success(addressBook);
+    }
 }

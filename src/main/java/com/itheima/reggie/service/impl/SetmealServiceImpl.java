@@ -1,14 +1,13 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.Result;
-import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Category;
-import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.mapper.SetmealMapper;
@@ -128,9 +127,20 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     }
 
     @Override
-    public void updateStatusById(Integer statusInt, Long ids) {
-        Setmeal setmeal = this.getById(ids);
-        setmeal.setStatus(statusInt);
-        this.updateById(setmeal);
+    public void updateStatusById(Integer statusInt, List<Long> ids) {
+        LambdaUpdateWrapper<Setmeal> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(Setmeal::getId, ids);
+        updateWrapper.set(Setmeal::getStatus, statusInt);
+        this.update(updateWrapper);
+    }
+
+    @Override
+    public Result<List<Setmeal>> getListById(Setmeal setmeal) {
+        LambdaQueryWrapper<Setmeal> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
+        lqw.eq(setmeal.getStatus() != null,Setmeal::getStatus,1);
+        lqw.orderByDesc(Setmeal::getUpdateTime);
+        List<Setmeal> list = this.list(lqw);
+        return Result.success(list);
     }
 }

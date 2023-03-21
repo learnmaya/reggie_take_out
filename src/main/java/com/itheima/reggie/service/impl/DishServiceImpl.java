@@ -1,6 +1,7 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
@@ -127,11 +128,12 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     }
 
     @Override
-    public String updateStatusById(Integer status, Long ids) {
+    public String updateStatusById(Integer status, List<Long> ids) {
         log.info("The status {} and ids {}",status,ids);
-        Dish dish = this.getById(ids);
-        dish.setStatus(status);
-        this.updateById(dish);
+        LambdaUpdateWrapper<Dish> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(ids != null, Dish::getId, ids);
+        updateWrapper.set(Dish::getStatus, status);
+        this.update(updateWrapper);
         String success = "Selling status modified successfully!";
         return success;
     }
@@ -157,12 +159,67 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     private final int statusCode = 1; // The dishes that on sell
 
     @Override
-    public Result<List<Dish>> getListByCategoryId(Dish dish) {
-        LambdaQueryWrapper<Dish> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(dish.getCategoryId() != null,Dish::getCategoryId,dish.getCategoryId());
-        lqw.eq(Dish::getStatus,statusCode);
-        lqw.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
-        List<Dish> dishList = this.list(lqw);
-        return Result.success(dishList);
+    public Result<List<DishDto>> getListByCategoryId(Dish dish) {
+        //条件查询器
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        //根据传进来的categoryId查询
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        //只查询状态为1的菜品（在售菜品）
+        queryWrapper.eq(Dish::getStatus, 1);
+        //简单排下序，其实也没啥太大作用
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        //获取查询到的结果作为返回值
+        List<Dish> list = this.list(queryWrapper);
+        log.info("查询到的菜品信息list:{}", list);
+        //item就是list中的每一条数据，相当于遍历了
+        List<DishDto> dishDtoList = list.stream().map((item) -> {
+            //创建一个dishDto对象
+            DishDto dishDto = new DishDto();
+            //将item的属性全都copy到dishDto里
+            BeanUtils.copyProperties(item, dishDto);
+            //由于dish表中没有categoryName属性，只存了categoryId
+            Long categoryId = item.getCategoryId();
+            //所以我们要根据categoryId查询对应的category
+            Category category = categoryService.getById(categoryId);
+            if (category != null) {
+                //然后取出categoryName，赋值给dishDto
+                dishDto.setCategoryName(category.getName());
+            }
+            //然后获取一下菜品id，根据菜品id去dishFlavor表中查询对应的口味，并赋值给dishDto
+            Long itemId = item.getId();
+            //条件构造器
+            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            //条件就是菜品id
+            lambdaQueryWrapper.eq(itemId != null, DishFlavor::getDishId, itemId);
+            //根据菜品id，查询到菜品口味
+            List<DishFlavor> flavors = dishFlavorService.list(lambdaQueryWrapper);
+            //赋给dishDto的对应属性
+            dishDto.setFlavors(flavors);
+            //并将dishDto作为结果返回
+            return dishDto;
+            //将所有返回结果收集起来，封装成List
+        }).collect(Collectors.toList());
+
+
+        // For loop method
+        // List<DishDto> dishDtoList = new ArrayList<>();
+        // for (Item item : list) {
+            //DishDto dishDto = new DishDto();
+            //BeanUtils.copyProperties(item, dishDto);
+            //Long categoryId = item.getCategoryId();
+            //Category category = categoryService.getById(categoryId);
+            //if (category != null) {
+            //    dishDto.setCategoryName(category.getName());
+            //}
+            //Long itemId = item.getId();
+            //LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            //lambdaQueryWrapper.eq(itemId != null, DishFlavor::getDishId, itemId);
+            //List<DishFlavor> flavors = dishFlavorService.list(lambdaQueryWrapper);
+            //dishDto.setFlavors(flavors);
+            //dishDtoList.add(dishDto);
+        //}
+        return Result.success(dishDtoList);
     }
+
+
 }

@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: com.itheima.reggie.service.impl.EmployeeServiceImplTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.395 s <<< FAILURE! - in com.itheima.reggie.service.impl.EmployeeServiceImplTest
+testLoginByEmployee  Time elapsed: 0.004 s  <<< ERROR!
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'com.itheima.reggie.service.impl.EmployeeServiceImplTest': Unsatisfied dependency expressed through field 'employeeService'; nested exception is org.springframework.beans.factory.BeanNotOfRequiredTypeException: Bean named 'employeeServiceImpl' is expected to be of type 'com.itheima.reggie.service.impl.EmployeeServiceImpl' but was actually of type 'jdk.proxy2.$Proxy88'
+Caused by: org.springframework.beans.factory.BeanNotOfRequiredTypeException: Bean named 'employeeServiceImpl' is expected to be of type 'com.itheima.reggie.service.impl.EmployeeServiceImpl' but was actually of type 'jdk.proxy2.$Proxy88'
+

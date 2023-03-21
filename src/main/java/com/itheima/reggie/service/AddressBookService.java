@@ -19,4 +19,6 @@ public interface AddressBookService extends IService<AddressBook> {
     Result<String> deleteAddress(Long ids);
 
     Result<AddressBook> setDefaultAddress(AddressBook addressBook);
+
+    Result<AddressBook> getDefaultAddress();
 }
