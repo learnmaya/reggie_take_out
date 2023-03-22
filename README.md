@@ -19,6 +19,9 @@ Backend
  - Spring Boot
  - MySQL (for data storage)
  - Redis (for caching)
+ - Swagger (for API doc & Testing)
+ 
+ 
 
 
 
