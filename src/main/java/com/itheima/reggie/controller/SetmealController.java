@@ -5,6 +5,7 @@ import com.itheima.reggie.common.Result;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.SetmealService;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/setmeal")
+@Api(tags = "SetMeal-related API")
 public class SetmealController {
 
     @Autowired

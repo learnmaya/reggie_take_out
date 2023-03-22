@@ -3,6 +3,7 @@ package com.itheima.reggie.controller;
 
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.service.CommonService;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @Slf4j
 @RequestMapping("/common")
+@Api(tags = "Common-related API")
 public class CommonController {
 
     @Autowired

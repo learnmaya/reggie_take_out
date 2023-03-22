@@ -4,6 +4,7 @@ package com.itheima.reggie.controller;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.entity.AddressBook;
 import com.itheima.reggie.service.AddressBookService;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/addressBook")
 @Slf4j
+@Api(tags = "AddressBook-related API")
 public class AddressBookController {
 
     @Autowired

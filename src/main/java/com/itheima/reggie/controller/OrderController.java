@@ -8,6 +8,7 @@ import com.itheima.reggie.entity.Orders;
 import com.itheima.reggie.service.OrderDetailService;
 import com.itheima.reggie.service.OrderService;
 import com.itheima.reggie.service.ShoppingCartService;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/order")
 @Slf4j
+@Api(tags = "Order-related API")
 public class OrderController {
 
     @Autowired
