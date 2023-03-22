@@ -1,6 +1,8 @@
 package com.itheima.reggie.service.impl;
 
+import com.alibaba.druid.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +13,7 @@ import com.itheima.reggie.dto.OrderDto;
 import com.itheima.reggie.entity.*;
 import com.itheima.reggie.mapper.OrderMapper;
 import com.itheima.reggie.service.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,10 +21,12 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implements OrderService {
 
     @Autowired
@@ -38,28 +43,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
 
     @Override
     public void submit(Orders orders) {
-        //获取当前用户id
+
         Long userId = BaseContext.getCurrentId();
-        //条件构造器
         LambdaQueryWrapper<ShoppingCart> shoppingCartLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        //根据当前用户id查询其购物车数据
         shoppingCartLambdaQueryWrapper.eq(userId != null, ShoppingCart::getUserId, userId);
         List<ShoppingCart> shoppingCarts = shoppingCartService.list(shoppingCartLambdaQueryWrapper);
-        //判断一下购物车是否为空
+
         if (shoppingCarts == null) {
-            throw new CustomException("购物车数据为空，不能下单");
+            throw new CustomException("Shopping cart is empty, can not place an order");
         }
-        //判断一下地址是否有误
         Long addressBookId = orders.getAddressBookId();
         AddressBook addressBook = addressBookService.getById(addressBookId);
         if (addressBookId == null) {
-            throw new CustomException("地址信息有误，不能下单");
+            throw new CustomException("Wrong address information, cannot place an order");
         }
-        //获取用户信息，为了后面赋值
+
         User user = userService.getById(userId);
         long orderId = IdWorker.getId();
         AtomicInteger amount = new AtomicInteger(0);
-        //向订单细节表设置属性
+
         List<OrderDetail> orderDetailList= shoppingCarts.stream().map((item) -> {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrderId(orderId);
@@ -75,7 +77,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
             return orderDetail;
         }).collect(Collectors.toList());
 
-        //向订单表设置属性
+
         orders.setId(orderId);
         orders.setNumber(String.valueOf(orderId));
         orders.setStatus(2);
@@ -93,12 +95,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
                         (addressBook.getDistrictName() == null ? "":addressBook.getDistrictName())+
                         (addressBook.getDetail() == null ? "":addressBook.getDetail())
         );
-
-        //根据查询到的购物车数据，对订单表插入数据（1条）
         super.save(orders);
-        //根据查询到的购物车数据，对订单明细表插入数据（多条）
         orderDetailService.saveBatch(orderDetailList);
-        //清空购物车数据
         shoppingCartService.remove(shoppingCartLambdaQueryWrapper);
     }
 
@@ -112,20 +110,86 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         lqw.eq(userId != null, Orders::getUserId, userId);
         lqw.orderByDesc(Orders::getOrderTime);
         this.page(orderPage,lqw);
+
         List<OrderDto> list = orderPage.getRecords().stream().map((item) -> {
             OrderDto ordersDto = new OrderDto();
-            //获取orderId,然后根据这个id，去orderDetail表中查数据
             Long orderId = item.getId();
             LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(OrderDetail::getOrderId, orderId);
             List<OrderDetail> details = orderDetailService.list(wrapper);
             BeanUtils.copyProperties(item, ordersDto);
-            //之后set一下属性
             ordersDto.setOrderDetails(details);
             return ordersDto;
         }).collect(Collectors.toList());
+
         BeanUtils.copyProperties(orderPage, orderDtoPage, "records");
         orderDtoPage.setRecords(list);
         return Result.success(orderDtoPage);
+    }
+
+    @Override
+    public Result<String> orderAgain(Map<String, String> map) {
+
+        Long orderId = Long.valueOf(map.get("id"));
+
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId,orderId);
+        List<OrderDetail> details = orderDetailService.list(queryWrapper);
+        Long userId = BaseContext.getCurrentId();
+
+        List<ShoppingCart> shoppingCarts = details.stream().map((item) ->{
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(item,shoppingCart);
+            shoppingCart.setUserId(userId);
+
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            return shoppingCart;
+        }).collect(Collectors.toList());
+
+        shoppingCartService.saveBatch(shoppingCarts);
+        return Result.success("Thanks for your support~");
+    }
+
+    @Override
+    public Result<Page> getOrderHistoryPage(int page, int pageSize, Long number, String beginTime, String endTime) {
+
+        Page<Orders> pageInfo = new Page<>(page, pageSize);
+        Page<OrderDto> ordersDtoPage = new Page<>(page, pageSize);
+
+        LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByDesc(Orders::getOrderTime);
+        queryWrapper.eq(number != null, Orders::getId, number);
+        queryWrapper.gt(!StringUtils.isEmpty(beginTime), Orders::getOrderTime, beginTime)
+                .lt(!StringUtils.isEmpty(endTime), Orders::getOrderTime, endTime);
+        this.page(pageInfo, queryWrapper);
+
+        List<OrderDto> list = pageInfo.getRecords().stream().map((item) -> {
+            OrderDto ordersDto = new OrderDto();
+            Long orderId = item.getId();
+            LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(OrderDetail::getOrderId, orderId);
+            List<OrderDetail> details = orderDetailService.list(wrapper);
+            BeanUtils.copyProperties(item, ordersDto);
+            ordersDto.setOrderDetails(details);
+            return ordersDto;
+        }).collect(Collectors.toList());
+
+        BeanUtils.copyProperties(pageInfo, ordersDtoPage, "records");
+        ordersDtoPage.setRecords(list);
+        log.info("list:{}", list);
+
+        return Result.success(ordersDtoPage);
+    }
+
+    @Override
+    public Result<String> changeStatus(Map<String, String> map) {
+        int status = Integer.parseInt(map.get("status"));
+        Long orderId = Long.valueOf(map.get("id"));
+        log.info("Modify order status:status={status},id={id}", status, orderId);
+        LambdaUpdateWrapper<Orders> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Orders::getId, orderId);
+        updateWrapper.set(Orders::getStatus, status);
+        this.update(updateWrapper);
+        return Result.success("Order status modified successfully");
     }
 }

@@ -27,8 +27,6 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper,Employee> im
     public Result<Employee> loginByEmployee(HttpServletRequest request, @RequestBody Employee employee){
         String password = employee.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
-
-
         LambdaQueryWrapper<Employee> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Employee::getUsername, employee.getUsername());
         Employee emp = employeeMapper.selectOne(lqw);

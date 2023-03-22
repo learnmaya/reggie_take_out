@@ -19,33 +19,28 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Override
     public Result<ShoppingCart> saveToCart(ShoppingCart shoppingCart) {
         log.info("shoppingCart={}", shoppingCart);
-        //获取当前用户id
+
         Long currentId = BaseContext.getCurrentId();
-        //设置当前用户id
         shoppingCart.setUserId(currentId);
-        //获取当前菜品id
         Long dishId = shoppingCart.getDishId();
-        //条件构造器
+
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        //判断添加的是菜品还是套餐
         if (dishId != null) {
             queryWrapper.eq(ShoppingCart::getDishId, dishId);
         } else {
             queryWrapper.eq(ShoppingCart::getSetmealId, shoppingCart.getSetmealId());
         }
-        //查询当前菜品或者套餐是否在购物车中
+
         ShoppingCart cartServiceOne = this.getOne(queryWrapper);
         if (cartServiceOne != null) {
-            //如果已存在就在当前的数量上加1
+
             Integer number = cartServiceOne.getNumber();
             cartServiceOne.setNumber(number + 1);
             this.updateById(cartServiceOne);
         } else {
-            //如果不存在，则还需设置一下创建时间
+
             shoppingCart.setCreateTime(LocalDateTime.now());
-            //如果不存在，则添加到购物车，数量默认为1
             this.save(shoppingCart);
-            //这里是为了统一结果，最后都返回cartServiceOne会比较方便
             cartServiceOne = shoppingCart;
         }
         return Result.success(cartServiceOne);
@@ -70,5 +65,36 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         return Result.success("Empty your shopping cart successfully");
     }
 
-
+    @Override
+    public Result<ShoppingCart> removeFromCart(ShoppingCart shoppingCart) {
+        Long dishId = shoppingCart.getDishId();
+        Long setmealId = shoppingCart.getSetmealId();
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
+        if (dishId != null) {
+            queryWrapper.eq(ShoppingCart::getDishId, dishId);
+            ShoppingCart dishCart = this.getOne(queryWrapper);
+            dishCart.setNumber(dishCart.getNumber() - 1);
+            Integer currentNum = dishCart.getNumber();
+            if (currentNum > 0) {
+                this.updateById(dishCart);
+            } else if (currentNum == 0) {
+                this.removeById(dishCart.getId());
+            }
+            return Result.success(dishCart);
+        }
+        if (setmealId != null) {
+            queryWrapper.eq(ShoppingCart::getSetmealId, setmealId);
+            ShoppingCart setmealCart = this.getOne(queryWrapper);
+            setmealCart.setNumber(setmealCart.getNumber() - 1);
+            Integer currentNum = setmealCart.getNumber();
+            if (currentNum > 0) {
+                this.updateById(setmealCart);
+            } else if (currentNum == 0) {
+                this.removeById(setmealCart.getId());
+            }
+            return Result.success(setmealCart);
+        }
+        return Result.error("System busy, please try again later");
+    }
 }

@@ -50,6 +50,7 @@
 /Users/dan/Code/Project/Java/reggie_take_out/src/main/java/com/itheima/reggie/service/impl/ShoppingCartServiceImpl.java
 /Users/dan/Code/Project/Java/reggie_take_out/src/main/java/com/itheima/reggie/controller/EmployeeController.java
 /Users/dan/Code/Project/Java/reggie_take_out/src/main/java/com/itheima/reggie/service/impl/OrderServiceImpl.java
+/Users/dan/Code/Project/Java/reggie_take_out/src/main/java/com/itheima/reggie/config/RedisConfig.java
 /Users/dan/Code/Project/Java/reggie_take_out/src/main/java/com/itheima/reggie/common/Result.java
 /Users/dan/Code/Project/Java/reggie_take_out/src/main/java/com/itheima/reggie/service/EmployeeService.java
 /Users/dan/Code/Project/Java/reggie_take_out/src/main/java/com/itheima/reggie/entity/Employee.java

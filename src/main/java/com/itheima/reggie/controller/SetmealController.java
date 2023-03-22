@@ -55,9 +55,9 @@ public class SetmealController {
 
     @DeleteMapping
     public Result<String> deleteByIds(@RequestParam List<Long> ids) {
-        log.info("要删除的套餐id为：{}",ids);
+        log.info("The setmeal id to be deleted is：{}",ids);
         setmealService.deleteWithDish(ids);
-        return Result.success("删除成功");
+        return Result.success("Deleted successfully");
     }
 
 
