@@ -76,7 +76,7 @@
 }
 
 #address_edit .divContent .divItem .spanChecked {
-  width: 50rem;
+  width: 60rem;
 }
 
 #address_edit .divContent .divItem span i {
@@ -94,7 +94,7 @@
 }
 
 #address_edit .divContent .divItem .spanItem {
-  width: 34rem;
+  width: 50rem;
   height: 20rem;
   opacity: 1;
   border: 1px solid #e5e4e4;

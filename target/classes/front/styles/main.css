@@ -48,9 +48,9 @@
 
 #main .divTitle .divStatic .divDesc .divName {
   width: 90rem;
-  height: 25rem;
+  height: 23rem;
   opacity: 1;
-  font-size: 18rem;
+  font-size: 16rem;
   font-family: PingFangSC, PingFangSC-Regular;
   font-weight: 500;
   text-align: left;
@@ -60,7 +60,7 @@
 
 #main .divTitle .divStatic .divDesc .divSend {
   opacity: 1;
-  font-size: 11rem;
+  font-size: 10rem;
   font-family: PingFangSC, PingFangSC-Regular;
   font-weight: 400;
   text-align: left;
@@ -92,7 +92,7 @@
   color: #9b9b9b;
   line-height: 17rem;
   margin-right: 18rem;
-  padding-top: 9rem;
+  padding-top: 4rem;
   border-top: 1rem dashed #ebebeb;
 }
 
