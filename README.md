@@ -6,7 +6,7 @@ The application allows users to select items from a menu, add them to a cart, an
 It also includes features such as user authentication, order history, and real-time updates.
 It also includes a Back End Management System to manage staff, dishes, order details and etc.
 
-## Technologies Used
+## Stacks Used
 
 The Reggie Take Out project uses the following stacks:
 
@@ -21,26 +21,6 @@ Backend
  - Redis (for caching)
  - Swagger (for API doc & Testing)
  
-```mermaid
-mindmap
- root((Reggie))
-  Backend
-   Staff
-   Categroy
-   Dish
-   SetMeal
-   OrderHistory
-  Frontend
-   Email Login
-   User Center
-     Address Management
-     Order History
-   Browse the menu
-   ShoppingCart
-     Add
-     Remove
-   Place Order
-```
 
 
 ## Demo
