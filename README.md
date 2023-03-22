@@ -21,6 +21,28 @@ Backend
  - Redis (for caching)
  - Swagger (for API doc & Testing)
  
+```mermaid
+mindmap
+ root((Reggie))
+  Backend
+   Staff
+   Categroy
+   Dish
+   SetMeal
+   OrderHistory
+  Frontend
+   Email Login
+   User Center
+     Address Management
+     Order History
+   Browse the menu
+   ShoppingCart
+     Add
+     Remove
+   Place Order
+```
+
+
 ## Demo
 
 ### For front-end
