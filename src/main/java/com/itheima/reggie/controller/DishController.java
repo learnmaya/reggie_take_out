@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,17 +25,17 @@ import java.util.List;
 public class DishController {
 
     @Autowired
-    DishService dishService;
-    @Autowired
-    DishFlavorService dishFlavorService;
+    private DishService dishService;
 
     @Autowired
-    CategoryService categoryService;
+    private RedisTemplate redisTemplate;
 
     @PostMapping
     public Result<String> save(@RequestBody DishDto dishDto) {
         log.info(dishDto.toString());
         dishService.saveWithFlavor(dishDto);
+        String key = "dish_" + dishDto.getCategoryId() + "_1";
+        redisTemplate.delete(key);
         return Result.success("Add new dish successfully ！");
     }
 
@@ -55,6 +56,8 @@ public class DishController {
     public Result<String> update(@RequestBody DishDto dishDto) {
         log.info("The received data is：{}", dishDto);
         dishService.updateWithFlavor(dishDto);
+        String key = "dish_" + dishDto.getCategoryId() + "_1";
+        redisTemplate.delete(key);
         return Result.success("Modified dishes successfully");
     }
 

@@ -17,10 +17,12 @@ import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +35,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
 
 
     @Override
@@ -44,14 +49,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         queryWrapper.like(name != null, Dish::getName, name);
         queryWrapper.orderByDesc(Dish::getUpdateTime);
         this.page(pageInfo, queryWrapper);
-        
-
         BeanUtils.copyProperties(pageInfo, dishDtoPage, "records");
-
-
         List<Dish> records = pageInfo.getRecords();
-
-
         List<DishDto> list = records.stream().map((item) -> {
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item, dishDto);
@@ -70,9 +69,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     public void saveWithFlavor(DishDto dishDto) {
         this.save(dishDto);
         Long dishId = dishDto.getId();
-
         List<DishFlavor> flavors = dishDto.getFlavors();
-
         for (DishFlavor dishFlavor : flavors) {
             dishFlavor.setDishId(dishId);
         }
@@ -83,7 +80,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Transactional
     public void updateWithFlavor(DishDto dishDto) {
         this.updateById(dishDto);
-
         LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.eq(DishFlavor::getDishId,dishDto.getId());
         dishFlavorService.remove(queryWrapper);
@@ -92,7 +88,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             item.setDishId(dishDto.getId());
             return item;
         }).collect(Collectors.toList());
-
         dishFlavorService.saveBatch(flavors);
     }
 
@@ -114,6 +109,13 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         LambdaUpdateWrapper<Dish> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.in(ids != null, Dish::getId, ids);
         updateWrapper.set(Dish::getStatus, status);
+        LambdaQueryWrapper<Dish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.in(Dish::getId, ids);
+        List<Dish> dishes = this.list(lambdaQueryWrapper);
+        for (Dish dish : dishes) {
+            String key = "dish_" + dish.getCategoryId() + "_1";
+            redisTemplate.delete(key);
+        }
         this.update(updateWrapper);
         String success = "Selling status modified successfully!";
         return success;
@@ -141,13 +143,21 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Override
     public Result<List<DishDto>> getListByCategoryId(Dish dish) {
+        List<DishDto> dishDtoList;
+        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
+        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+
+        if (dishDtoList != null){
+            return Result.success(dishDtoList);
+        }
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
         queryWrapper.eq(Dish::getStatus, 1);
         queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+
         List<Dish> list = this.list(queryWrapper);
-        log.info("Check the list of dish information:{}", list);
-        List<DishDto> dishDtoList = list.stream().map((item) -> {
+        dishDtoList = list.stream().map((item) -> {
+
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item, dishDto);
             Long categoryId = item.getCategoryId();
@@ -158,30 +168,12 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             Long itemId = item.getId();
             LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(itemId != null, DishFlavor::getDishId, itemId);
+
             List<DishFlavor> flavors = dishFlavorService.list(lambdaQueryWrapper);
             dishDto.setFlavors(flavors);
             return dishDto;
         }).collect(Collectors.toList());
-
-        // For loop method
-        // List<DishDto> dishDtoList = new ArrayList<>();
-        // for (Item item : list) {
-            //DishDto dishDto = new DishDto();
-            //BeanUtils.copyProperties(item, dishDto);
-            //Long categoryId = item.getCategoryId();
-            //Category category = categoryService.getById(categoryId);
-            //if (category != null) {
-            //    dishDto.setCategoryName(category.getName());
-            //}
-            //Long itemId = item.getId();
-            //LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            //lambdaQueryWrapper.eq(itemId != null, DishFlavor::getDishId, itemId);
-            //List<DishFlavor> flavors = dishFlavorService.list(lambdaQueryWrapper);
-            //dishDto.setFlavors(flavors);
-            //dishDtoList.add(dishDto);
-        //}
+        redisTemplate.opsForValue().set(key,dishDtoList,60, TimeUnit.MINUTES);
         return Result.success(dishDtoList);
     }
-
-
 }

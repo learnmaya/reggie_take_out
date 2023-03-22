@@ -16,6 +16,8 @@ import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public void saveSetMeal(SetmealDto setmealDto) {
         this.save(setmealDto);
         List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
@@ -101,11 +104,11 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> updateWithId(SetmealDto setmealDto) {
         Long setmealId = setmealDto.getId();
 
         this.updateById(setmealDto);
-
         LambdaQueryWrapper<SetmealDish> lqw = new LambdaQueryWrapper<>();
         lqw.eq(SetmealDish::getSetmealId,setmealId);
         setmealDishService.remove(lqw);
@@ -120,6 +123,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     }
 
     @Override
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public void updateStatusById(Integer statusInt, List<Long> ids) {
         LambdaUpdateWrapper<Setmeal> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.in(Setmeal::getId, ids);
@@ -128,6 +132,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     }
 
     @Override
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId + '_' + #setmeal.status")
     public Result<List<Setmeal>> getListById(Setmeal setmeal) {
         LambdaQueryWrapper<Setmeal> lqw = new LambdaQueryWrapper<>();
         lqw.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
